@@ -18,6 +18,53 @@ function saveQuotes() {
   localStorage.setItem('quotes', JSON.stringify(quotes));
 }
 
+// Function to add a new quote to the local storage and update the server
+function addQuote() {
+  const quoteText = document.getElementById('newQuoteText').value.trim();
+  const quoteCategory = document.getElementById('newQuoteCategory').value.trim();
+
+  if (quoteText && quoteCategory) {
+    const newQuote = { text: quoteText, category: quoteCategory };
+    quotes.push(newQuote);
+    saveQuotes();
+    populateCategories();
+    filterQuotes();
+
+    // Clear the input fields
+    document.getElementById('newQuoteText').value = '';
+    document.getElementById('newQuoteCategory').value = '';
+
+    // Send the new quote to the server using a POST request
+    sendQuoteToServer(newQuote);
+  } else {
+    alert('Please enter both a quote and a category.');
+  }
+}
+
+// Function to send a new quote to the server using a POST request
+async function sendQuoteToServer(quote) {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title: quote.text,
+        body: quote.category,
+        userId: 1 // Simulate a user ID for the post
+      })
+    });
+
+    const responseData = await response.json();
+    console.log('Quote successfully sent to the server:', responseData);
+  } catch (error) {
+    console.error('Error sending quote to the server:', error);
+  }
+}
+
+// Other existing functions (showRandomQuote, createAddQuoteForm, populateCategories, filterQuotes) remain the same
+
 // Function to fetch quotes from the server and update local data
 async function fetchQuotesFromServer() {
   try {
@@ -61,8 +108,6 @@ function notifyUserOfUpdate() {
     notification.remove();
   }, 5000);
 }
-
-// Other existing functions (showRandomQuote, createAddQuoteForm, populateCategories, filterQuotes, addQuote) remain the same
 
 // Initialize the app
 loadQuotes();
